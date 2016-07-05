@@ -44,11 +44,12 @@ end
       config << "\nRails.application.config.logger = Logger.new(STDOUT)\n"
       File.write('config/environments/development.rb', config)
 
-      log, e, s = Open3.capture3(%!bin/rails runner 'User.xxx'!)
+      log, e, s = Open3.capture3(%!bin/rails runner 'p User.xxx'!)
+      puts log, e
 
       raise("Failed to run script:\n#{e}") unless s.success?
-      raise("File path or line number is missing:\n#{log}") unless log.include?('app/models/user.rb:3')
-      raise("Method name is missing:\n#{log}") unless log.include?('xxx')
+      raise("File path or line number is missing:\n#{log}\n#{e}") unless log.include?('app/models/user.rb:3')
+      raise("Method name is missing:\n#{log}\n#{e}") unless log.include?('xxx')
     end
   end
 end
