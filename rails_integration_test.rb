@@ -47,8 +47,8 @@ end
       log, e, s = Open3.capture3(%!bin/rails runner 'User.xxx'!)
 
       raise("Failed to run script:\n#{e}") unless s.success?
-      raise('File path or line number is missing') unless log.include?('app/models/user.rb:3')
-      raise('Method name is missing') unless log.include?('xxx')
+      raise("File path or line number is missing:\n#{log}") unless log.include?('app/models/user.rb:3')
+      raise("Method name is missing:\n#{log}") unless log.include?('xxx')
     end
   end
 end
