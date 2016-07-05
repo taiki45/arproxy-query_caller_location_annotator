@@ -1,5 +1,5 @@
 # Arproxy::QueryCallerLocationAnnotator
-[![Build Status](https://travis-ci.org/taiki45/arproxy-query_caller_location_annotator.svg?branch=master)](https://travis-ci.org/taiki45/arproxy-query_caller_location_annotator)
+[![Build Status](https://travis-ci.org/taiki45/arproxy-query_caller_location_annotator.svg?branch=master)](https://travis-ci.org/taiki45/arproxy-query_caller_location_annotator) [![Gem Version](https://badge.fury.io/rb/arproxy-query_caller_location_annotator.svg)](https://badge.fury.io/rb/arproxy-query_caller_location_annotator)
 
 Append query caller method to each ActiveRecord's query log like:
 
