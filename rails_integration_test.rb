@@ -1,0 +1,48 @@
+require 'fileutils'
+
+def execute_without_bundler
+  defined?(Bundler) ? Bundler.with_clean_env { yield } : yield
+end
+
+name = 'test_app'
+
+execute_without_bundler do
+  system('bundle install -j8')
+  FileUtils.rm_rf('tmp')
+  FileUtils.mkdir_p('tmp')
+  Dir.chdir('tmp') do
+    system("bundle exec rails new #{name} --skip-bundle")
+    Dir.chdir(name) do
+      lines = File.read('Gemfile').split("\n")
+      lines.reject! {|l| l.match(/sqlite3/) }
+      new = lines.first(1) + [
+        %!gem "mysql2"!,
+        %!gem "arproxy-query_caller_location_annotator", path: "#{__dir__}"!,
+      ] + lines.drop(1)
+      File.open('Gemfile', 'w') {|f| f.puts(new.join("\n")) }
+
+      database_config = File.read('config/database.yml')
+      database_config.gsub!('adapter: sqlite3', 'adapter: mysql2')
+      database_config.gsub!(%r{database: db/\w+.sqlite3}, 'database: arproxy_test_app')
+      File.write('config/database.yml', database_config)
+
+      system('bundle install -j8')
+      system('bin/rails db:drop db:setup')
+      system('bin/rails g model user name:string')
+      system('bin/rails db:migrate')
+
+      File.write('app/models/user.rb', <<-EOF)
+class User < ApplicationRecord
+  def self.xxx
+    first
+  end
+end
+      EOF
+      system(%!bin/rails runner 'User.xxx'!)
+      log = File.read('log/development.log')
+
+      raise('File path or line number is missing') unless log.include?('app/models/user.rb:3')
+      raise('Method name is missing') unless log.include?('xxx')
+    end
+  end
+end
