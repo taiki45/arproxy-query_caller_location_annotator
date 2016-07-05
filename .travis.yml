@@ -6,3 +6,5 @@ branches:
 rvm:
   - "2.2.5"
   - "2.3.1"
+services:
+  - mysql
