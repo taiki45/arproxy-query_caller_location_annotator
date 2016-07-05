@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'open3'
 
 def execute_without_bundler
   defined?(Bundler) ? Bundler.with_clean_env { yield } : yield
@@ -38,9 +39,14 @@ class User < ApplicationRecord
   end
 end
       EOF
-      system(%!bin/rails runner 'User.xxx'!)
-      log = File.read('log/development.log')
 
+      config = File.read('config/environments/development.rb')
+      config << "\nRails.application.config.logger = Logger.new(STDOUT)\n"
+      File.write('config/environments/development.rb', config)
+
+      log, e, s = Open3.capture3(%!bin/rails runner 'User.xxx'!)
+
+      raise("Failed to run script:\n#{e}") unless s.success?
       raise('File path or line number is missing') unless log.include?('app/models/user.rb:3')
       raise('Method name is missing') unless log.include?('xxx')
     end
